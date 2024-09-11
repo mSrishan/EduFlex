@@ -3,13 +3,13 @@ const Schema = mongoose.Schema;
 
 let Assignment = new Schema({
     Course: {
-        type: String,
+        type: String
     },
     Assignment_name: {
-        type: String,
+        type: String
     },
     Deadline: {
-        type: String,
+        type: String
     }
 },{
         collection: 'assignments'
