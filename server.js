@@ -1,25 +1,24 @@
-var express = require('express');
-var fileUpload = require('express-fileupload');
-var cors = require('cors');
-var path = require('path');
+const express = require('express');
+const fileUpload = require('express-fileupload');
+const cors = require('cors');
+const path = require('path');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const assignmentRoutes = require('./routes/Assignment');
+const Users = require('./routes/Users');
 
-var bodyParser = require('body-parser');
-var assignmentRoutes = require('./routes/Assignment');
-var app = express();
-var mongoose = require('mongoose');
-var port = process.env.PORT || 5000;
+const app = express();
+const port = process.env.PORT || 5000;
 
-app.use(bodyParser.json());
+// Middleware
 app.use(cors());
-
-app.use(
-    bodyParser.urlencoded({
-        extended: false
-    })
-);
-    
-app.use('/Assignments', assignmentRoutes);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(fileUpload());
+
+// Routes
+app.use('/Assignments', assignmentRoutes);
+app.use('/users', Users);
 
 app.post('/upload', (req, res) => {
     if (req.files === null) {
@@ -34,8 +33,14 @@ app.post('/upload', (req, res) => {
         res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
     });
 });
-var corsOptions = {
-    origin: '*',
-    optionsSuccessStatus: 200,
-}
-app.use(cors(corsOptions));
+
+// MongoDB Connection
+const mongoURI = 'mongodb://localhost:27017/Students'; 
+mongoose
+    .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('MongoDB Connected'))
+    .catch(err => console.log(err));
+
+app.listen(port, () => {
+    console.log('Server is running on Port: ', port);
+});

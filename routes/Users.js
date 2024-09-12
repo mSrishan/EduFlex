@@ -1,35 +1,39 @@
 const express = require('express');
-const users = express.Router(); //for endpoints
-const cors = require('cors'); //for share resources
-const jwt = require('jsonwebtoken'); //for secure transfer details
-const bcrypt = require('bcrypt'); //to hide passwords
+const users = express.Router();
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const User = require('../models/User');
-require('dotenv').config(); // Load environment variables
 
 users.use(cors());
+const SECRET_KEY = 'your_secret_key_here'; // Hard-coded secret key
 
 users.post('/register', async (req, res) => {
     try {
         const today = new Date();
-        const userData = {
-            First_name: req.body.First_name,
-            Last_name: req.body.Last_name,
-            Email: req.body.Email,
-            Password: req.body.Password,
-            Created: today
-        };
+        const { First_name, Last_name, Email, Password } = req.body;
+
+        if (!First_name || !Last_name || !Email || !Password) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
 
         // Check if user already exists
-        let user = await User.findOne({ Email: req.body.Email });
+        let user = await User.findOne({ Email });
         if (!user) {
             // Hash password and create user
-            const hashedPassword = await bcrypt.hash(req.body.Password, 10);
-            userData.Password = hashedPassword;
+            const hashedPassword = await bcrypt.hash(Password, 10);
+            const userData = {
+                First_name,
+                Last_name,
+                Email,
+                Password: hashedPassword,
+                Created: today
+            };
 
             user = await User.create(userData);
-            res.json({ status: user.Email + " registered" });
+            res.json({ status: `${user.Email} registered` });
         } else {
-            res.json({ error: "User already registered" });
+            res.status(400).json({ error: "User already registered" });
         }
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -38,10 +42,16 @@ users.post('/register', async (req, res) => {
 
 users.post('/login', async (req, res) => {
     try {
-        const user = await User.findOne({ Email: req.body.Email });
+        const { Email, Password } = req.body;
+
+        if (!Email || !Password) {
+            return res.status(400).json({ error: "Email and password are required" });
+        }
+
+        const user = await User.findOne({ Email });
         if (user) {
             // Check password
-            const match = await bcrypt.compare(req.body.Password, user.Password);
+            const match = await bcrypt.compare(Password, user.Password);
             if (match) {
                 const payload = {
                     _id: user._id,
@@ -50,8 +60,8 @@ users.post('/login', async (req, res) => {
                     Email: user.Email
                 };
 
-                const token = jwt.sign(payload, process.env.SECRET_KEY, {
-                    expiresIn: '24h' // Use a string for time units
+                const token = jwt.sign(payload, SECRET_KEY, {
+                    expiresIn: '24h'
                 });
 
                 res.json({ token });
@@ -67,19 +77,27 @@ users.post('/login', async (req, res) => {
 });
 
 users.get('/profile', (req, res) => {
-    var decoded = jwt.verify(req.headers['authorization'], process.env.SECRET_KEY)
-    User.findOne({
-        _id: decoded._id
-    })
-        .then(user => {
-            if (user) {
-            res.json(user)
-            } else {
-                res.send("User does not exist");
-        }
-    })
-        .catch(err => {
-            res.send("Error" + err);
-    })
-})
+    const token = req.headers['authorization'];
+    if (!token) {
+        return res.status(403).json({ error: "No token provided" });
+    }
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        User.findOne({ _id: decoded._id })
+            .then(user => {
+                if (user) {
+                    res.json(user);
+                } else {
+                    res.status(404).json({ error: "User does not exist" });
+                }
+            })
+            .catch(err => {
+                res.status(500).json({ error: err.message });
+            });
+    } catch (err) {
+        res.status(401).json({ error: "Invalid token" });
+    }
+});
+
 module.exports = users;

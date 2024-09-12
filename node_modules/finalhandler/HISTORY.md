@@ -1,3 +1,14 @@
+v2.0.0 / 2024-09-02
+==================
+
+  * drop support for node <18
+  * ignore status message for HTTP/2 (#53) 
+
+v1.2.1 / 2024-09-02
+==================
+
+  * Gracefully handle when handling an error and socket is null
+
 1.2.0 / 2022-03-22
 ==================
 

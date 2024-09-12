@@ -1,37 +1,44 @@
 const express = require('express');
 const assignmentRoutes = express.Router();
 
-let Assignment = require('../models/Assignment')
+let Assignment = require('../models/Assignment');
 
-//request for ADD ASSIGNMENT
-assignmentRoutes.route('/add').post(function (req, res) {
+// Request to add an assignment
+assignmentRoutes.post('/add', (req, res) => {
     let assignment = new Assignment(req.body);
     assignment.save()
-        .then(assignment => {
-            res.status(200).json({ 'assignment': 'assignment added successfully' });
+        .then(() => {
+            res.status(200).json({ message: 'Assignment added successfully' });
         })
         .catch(err => {
-            res.status(400).send('Adding new assignment failed');
+            res.status(400).json({ error: 'Adding new assignment failed', details: err });
+        });
+});
+
+// Request to get all assignments
+assignmentRoutes.get('/', (req, res) => {
+    Assignment.find()
+        .then(assignments => {
+            res.status(200).json(assignments);
         })
-})
-    
-//request for GET ASSIGNMENT
-assignmentRoutes.route('/').get(function (req, res) {
-    Assignment.find(function (err, assignment) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(assignment);
-        }
-    });
+        .catch(err => {
+            res.status(500).json({ error: 'Failed to retrieve assignments', details: err });
+        });
 });
 
-//request for DELETE ASSIGNMENT
-assignmentRoutes.route('/delete/:id').get(function (req, res) {
-    Assignment.findByIdAndDelete({ _id: req.params.id }, function (err, assignment) {
-        if (err) res.json(err);
-        else res.json('Successfully removed');
-    })
+// Request to delete an assignment by ID
+assignmentRoutes.delete('/delete/:id', (req, res) => {
+    Assignment.findByIdAndDelete(req.params.id)
+        .then(result => {
+            if (result) {
+                res.status(200).json({ message: 'Successfully removed' });
+            } else {
+                res.status(404).json({ error: 'Assignment not found' });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({ error: 'Failed to delete assignment', details: err });
+        });
 });
+
 module.exports = assignmentRoutes;
-
