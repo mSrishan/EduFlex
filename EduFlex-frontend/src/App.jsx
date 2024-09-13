@@ -9,6 +9,7 @@ import FileUpload from "./components/FileUpload";
 import AssignmentList from "./components/AssignmentList";
 import ProfileDetails from "./components/ProfileDetails";
 
+
 class App extends Component {
   render() {
     return (
@@ -16,15 +17,13 @@ class App extends Component {
         <div className="App">
           <Navbar />
           <Routes>
-            <Route exact path="/" element={<Landing />} />
-            <Route exact path="/register" element={<Register />} />
-            <Route exact path="/login" element={<Login />} />
-            <Route exact path="/profile" element={<Profile />} />
-            <Route exact path="/uploads" element={<FileUpload />} />
-            <Route exact path="/assignments" element={<AssignmentList />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/uploads" element={<FileUpload />} />
+            <Route path="/assignments" element={<AssignmentList />} />
             <Route path="/profile-details" element={<ProfileDetails />} />
-            
-            
           </Routes>
         </div>
       </Router>
