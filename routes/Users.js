@@ -47,41 +47,39 @@ users.post('/register', async (req, res) => {
 
 // Login route
 users.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-        // Validate input
-        if (!email || !password) {
-            return res.status(400).json({ error: "Email and password are required" });
-        }
-
-        // Find the user by email
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ error: "User does not exist" });
-        }
-
-        // Compare passwords
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) {
-            return res.status(401).json({ error: "Invalid credentials" });
-        }
-
-        // Generate JWT token
-        const payload = {
-            _id: user._id,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            email: user.email
-        };
-
-        const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '24h' });
-        res.status(200).json({ token });
-
-    } catch (err) {
-        console.error('Error in /login route:', err);
-        res.status(500).json({ error: 'Internal server error' });
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
     }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ error: "User does not exist" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const payload = {
+      _id: user._id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+    };
+
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '24h' });
+    res.status(200).json({ token });
+
+  } catch (err) {
+    console.error('Error in /login route:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
+
+
 
 module.exports = users;
