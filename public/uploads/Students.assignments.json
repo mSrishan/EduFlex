@@ -1,0 +1,33 @@
+[{
+  "_id": {
+    "$oid": "64f8b2d7e0c9c3fdd218e4a1"
+  },
+  "Course": "Introduction to Computer Science",
+  "Assignment_name": "Week 1 Homework",
+  "Deadline": "2024-09-15T23:59:00.000Z"
+},
+{
+  "_id": {
+    "$oid": "64f8b2d7e0c9c3fdd218e4a2"
+  },
+  "Course": "Data Structures and Algorithms",
+  "Assignment_name": "Sorting Algorithms Project",
+  "Deadline": "2024-09-22T23:59:00.000Z"
+},
+{
+  "_id": {
+    "$oid": "64f8b2d7e0c9c3fdd218e4a3"
+  },
+  "Course": "Web Development",
+  "Assignment_name": "Responsive Design Challenge",
+  "Deadline": "2024-09-30T23:59:00.000Z"
+},
+{
+  "_id": {
+    "$oid": "66e2bf3969d58032da999af4"
+  },
+  "Course": "Angular",
+  "Assignment_name": "second",
+  "Deadline": "02/01/2025",
+  "__v": 0
+}]

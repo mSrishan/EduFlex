@@ -8,6 +8,7 @@ import Profile from "./components/Profile";
 import FileUpload from "./components/FileUpload";
 import AssignmentList from "./components/AssignmentList";
 import ProfileDetails from "./components/ProfileDetails";
+import EventComponent from "./components/EventComponent";
 
 
 class App extends Component {
@@ -24,6 +25,7 @@ class App extends Component {
             <Route path="/uploads" element={<FileUpload />} />
             <Route path="/assignments" element={<AssignmentList />} />
             <Route path="/profile-details" element={<ProfileDetails />} />
+            <Route path="/events" element={<EventComponent />} />
           </Routes>
         </div>
       </Router>
