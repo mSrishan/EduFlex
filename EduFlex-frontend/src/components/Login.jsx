@@ -1,77 +1,43 @@
-import React, { Component } from 'react';
-import { login } from './UserFunctions';
-// If using React Router v6, use the useNavigate hook instead
+import React, { useState } from 'react';
+import { login } from './UserFunctions'; // Adjust path as needed
 
-class Login extends Component {
-    constructor() {
-        super();
-        this.state = {
-            email: '',
-            password: ''
-        };
-        this.onChange = this.onChange.bind(this);
-        this.onSubmit = this.onSubmit.bind(this);
-    }
+const Login = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
 
-    onChange(e) { 
-        this.setState({ [e.target.name]: e.target.value });
-    }
-
-    onSubmit(e) {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const user = {
-            email: this.state.email,
-            password: this.state.password
-        };
-        login(user).then(res => {
-            if (res) {
-                // If using React Router v6, use navigate from useNavigate hook
-                this.props.history.push('/profile');
-            }
-        });
-    }
+        try {
+            const user = { email, password };
+            const response = await login(user);
+            console.log('Login successful:', response);
+            // Redirect or update UI based on successful login
+        } catch (err) {
+            console.error('Login failed:', err);
+        }
+    };
 
-    render() {
-        return (
-            <div className='container'>
-                <div className='row'>
-                    <div className='col-md-6 mt-5 mx-auto'>
-                        <form noValidate onSubmit={this.onSubmit}>
-                            <h1 className='h3 mb-3 font-weight-normal'>
-                                <p align="center">Student Login</p>
-                            </h1>
-                            <div className='form-group'>
-                                <label htmlFor='email'>Email Address</label>
-                                <input
-                                    type='email'
-                                    className='form-control'
-                                    name='email'
-                                    placeholder='Enter Email'
-                                    value={this.state.email}
-                                    onChange={this.onChange}
-                                />
-                            </div>
-                            <div className='form-group'>
-                                <label htmlFor='password'>Password</label>
-                                <input
-                                    type='password'  // Changed to 'password'
-                                    className='form-control'
-                                    name='password'
-                                    placeholder='Enter Password'
-                                    value={this.state.password}
-                                    onChange={this.onChange}
-                                />
-                            </div>
-                            <button
-                                type='submit'
-                                className='btn btn-lg btn-primary btn-block'>Sign In
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-}
+    return (
+        <form onSubmit={handleSubmit}>
+            <label htmlFor="email">Email:</label>
+            <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+            />
+            <label htmlFor="password">Password:</label>
+            <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+            />
+            <button type="submit">Login</button>
+        </form>
+    );
+};
 
 export default Login;

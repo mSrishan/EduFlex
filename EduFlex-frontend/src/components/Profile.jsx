@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import * as jwt_decode from 'jwt-decode'; // Use named import
+import * as jwt_decode from 'jwt-decode'; // Correct way to import named export
+// Named import syntax
 
 class Profile extends Component {
     constructor() {
@@ -11,21 +12,26 @@ class Profile extends Component {
         };
     }
 
+    
+
     componentDidMount() {
-        const token = localStorage.getItem('usertoken');
-        if (token) {
-            try {
-                const decoded = jwt_decode(token);
-                this.setState({
-                    first_name: decoded.identity.first_name,
-                    last_name: decoded.identity.last_name,
-                    email: decoded.identity.email
+    const token = localStorage.getItem('jwtToken'); // or wherever you store your token
+    if (token) {
+      try {
+        const decodedtoken = jwt_decode(token);
+          // use decodedToken as needed
+          this.setState({
+                    first_name: decodedtoken.first_name,
+                    last_name: decodedtoken.last_name,
+                    email: decodedtoken.email
                 });
-            } catch (err) {
-                console.error('Error decoding token:', err);
-            }
-        }
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
     }
+  }
+
+
 
     render() {
         return (
@@ -34,7 +40,6 @@ class Profile extends Component {
                     <div className='col-sm-8 mx-auto'>
                         <h1 className='text-center'>PROFILE</h1>
                     </div>
-                    
                     <table className='table col-md-6 mx-auto'>
                         <tbody>
                             <tr>

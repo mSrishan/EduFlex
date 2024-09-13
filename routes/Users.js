@@ -6,97 +6,81 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 
 users.use(cors());
-const SECRET_KEY = 'your_secret_key_here'; // Hard-coded secret key
+const SECRET_KEY = process.env.SECRET_KEY || 'your_secret_key_here';
 
+// Register route
 users.post('/register', async (req, res) => {
     try {
-        const today = new Date();
-        const { First_name, Last_name, Email, Password } = req.body;
+        const { first_name, last_name, email, password } = req.body;
 
-        if (!First_name || !Last_name || !Email || !Password) {
+        // Validate input
+        if (!first_name || !last_name || !email || !password) {
             return res.status(400).json({ error: "All fields are required" });
         }
 
-        // Check if user already exists
-        let user = await User.findOne({ Email });
-        if (!user) {
-            // Hash password and create user
-            const hashedPassword = await bcrypt.hash(Password, 10);
-            const userData = {
-                First_name,
-                Last_name,
-                Email,
-                Password: hashedPassword,
-                Created: today
-            };
-
-            user = await User.create(userData);
-            res.json({ status: `${user.Email} registered` });
-        } else {
-            res.status(400).json({ error: "User already registered" });
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: "User already registered" });
         }
+
+        // Hash the password and create a new user
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({
+            first_name,
+            last_name,
+            email,
+            password: hashedPassword
+        });
+
+        await newUser.save();
+        res.status(201).json({ status: `${newUser.email} registered successfully` });
+
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('Error in /register route:', err);
+        if (err.code === 11000) {
+            return res.status(400).json({ error: 'Email already exists' });
+        }
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
+// Login route
 users.post('/login', async (req, res) => {
     try {
-        const { Email, Password } = req.body;
+        const { email, password } = req.body;
 
-        if (!Email || !Password) {
+        // Validate input
+        if (!email || !password) {
             return res.status(400).json({ error: "Email and password are required" });
         }
 
-        const user = await User.findOne({ Email });
-        if (user) {
-            // Check password
-            const match = await bcrypt.compare(Password, user.Password);
-            if (match) {
-                const payload = {
-                    _id: user._id,
-                    First_name: user.First_name,
-                    Last_name: user.Last_name,
-                    Email: user.Email
-                };
-
-                const token = jwt.sign(payload, SECRET_KEY, {
-                    expiresIn: '24h'
-                });
-
-                res.json({ token });
-            } else {
-                res.status(401).json({ error: "Invalid credentials" });
-            }
-        } else {
-            res.status(401).json({ error: "User does not exist" });
+        // Find the user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ error: "User does not exist" });
         }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 
-users.get('/profile', (req, res) => {
-    const token = req.headers['authorization'];
-    if (!token) {
-        return res.status(403).json({ error: "No token provided" });
-    }
+        // Compare passwords
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
 
-    try {
-        const decoded = jwt.verify(token, SECRET_KEY);
-        User.findOne({ _id: decoded._id })
-            .then(user => {
-                if (user) {
-                    res.json(user);
-                } else {
-                    res.status(404).json({ error: "User does not exist" });
-                }
-            })
-            .catch(err => {
-                res.status(500).json({ error: err.message });
-            });
+        // Generate JWT token
+        const payload = {
+            _id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email
+        };
+
+        const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '24h' });
+        res.status(200).json({ token });
+
     } catch (err) {
-        res.status(401).json({ error: "Invalid token" });
+        console.error('Error in /login route:', err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
