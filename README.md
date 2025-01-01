@@ -4,9 +4,6 @@
 
 Welcome to **EduFlex** – a dynamic MERN stack application designed for educational management. Whether you're a student or an educator, EduFlex offers a seamless experience to handle profiles, assignments, and events.
 
-## 🌐 Live Demo
-
-Check out our live demo here: [EduFlex Events](https://edu-flex-two.vercel.app/events)
 
 ## 💻 Technologies Used
 
